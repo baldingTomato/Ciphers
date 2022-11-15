@@ -1,3 +1,5 @@
+//Tomasz Kłuba, 275542
+
 #include <iostream>
 #include <string.h>
 #include <fstream>
@@ -40,7 +42,8 @@ void EncryptCaesar(std::string text, int key)
 
     }
 
-    std::cout << text << std::endl;
+    //std::cout << text << std::endl;
+
     std::fstream file;
     file.open("crypto.txt", std::fstream::out);
     file << text;
@@ -86,7 +89,7 @@ void DecryptCaesar(std::string text, int key)
 
     }
 
-    std::cout << text << std::endl;
+    //std::cout << text << std::endl;
 
     std::fstream file;
     file.open("decrypt.txt", std::fstream::out);
@@ -120,7 +123,13 @@ void EncryptAffine(std::string text, int a, int b)
 
     }
 
-    std::cout << text << std::endl;
+    //std::cout << text << std::endl;
+
+    std::fstream file;
+    file.open("crypto.txt", std::fstream::out);
+    file << text;
+    file.close();
+
 }
 
 void DecryptAffine(std::string text, int a, int b)
@@ -163,7 +172,12 @@ void DecryptAffine(std::string text, int a, int b)
 
     }
 
-    std::cout << text << std::endl;
+    std::cout << "a' value equals: " << a_inverse << std::endl;
+
+    std::fstream file;
+    file.open("decrypt.txt", std::fstream::out);
+    file << text;
+    file.close();
 }
 
 void CryptanalysisCaesar(std::string text) {
@@ -214,7 +228,12 @@ void CryptanalysisCaesar(std::string text) {
 
     }
 
-    std::cout << odszyfrowane << std::endl;
+    //std::cout << odszyfrowane << std::endl;
+
+    std::fstream file;
+    file.open("plain.txt", std::fstream::out);
+    file << odszyfrowane;
+    file.close();
 
 }
 
@@ -265,13 +284,163 @@ void CryptanalysisCaesarWithHelp(std::string text, std::string help) {
         }
 
         if (odszyfrowane.find(help) != std::string::npos) {
-            std::cout << "Key: " << key << " decrypted text: " << odszyfrowane << '\n';
+
+            std::fstream file;
+            file.open("key_found.txt", std::fstream::out);
+            file << key << "\n" << odszyfrowane;
+            file.close();
+            
+            //std::cout << "Key: " << key << " decrypted text: " << odszyfrowane << '\n';
             break;
         }
 
     }
 
 }
+
+int NWD(int x, int y) {
+
+    while (x != y) {
+
+        if (x > y) {
+
+            x -= y;
+
+        }
+        else {
+
+            y -= x;
+
+        }
+
+    }
+
+    return x;
+}
+
+void CryptanalysisAffineWithHelp(std::string text, std::string help) {
+
+    std::string odszyfrowane = "";
+
+    int a_inverse = 0;
+    int temp = 0;
+    
+    for(int a = 1; a < 26; a++){
+
+        if(NWD(a, 26) == 1){
+
+            for(int b = 0; b < 26; b++){
+
+                for(int i = 0; i < 26; i++){
+
+                    temp = (a * i) % 26;
+
+                    if (temp == 1) {
+
+                        a_inverse = i;
+
+                    }
+
+                }
+
+                odszyfrowane = "";
+
+                for(int i = 0; i < text.length(); i++) {
+
+                    if(text[i] >= 'A' && text[i] <= 'Z'){
+
+                        char Cchar = (char)(((a_inverse * ((text[i] + 'A' - b)) % 26)) + 'A');
+                        odszyfrowane.push_back(Cchar);
+
+                    }else if(text[i] >= 'a' && text[i] <= 'z'){
+
+                        char Cchar = (char)(((a_inverse * ((text[i] + 'a' - b)) % 26)) + 'a');
+                        odszyfrowane.push_back(Cchar);
+
+                    }else{
+
+                        odszyfrowane.push_back(text[i]);;
+
+                    }
+
+                }
+
+                if(odszyfrowane.find(help) != std::string::npos){
+
+                    std::fstream file;
+                    file.open("key_found.txt", std::fstream::out);
+                    file << "a: " << a << " b: " << " text: " << odszyfrowane << "\n";
+
+                }
+
+            }
+        }
+    }
+
+}
+
+void CryptanalysisAffine(std::string text) {
+
+    std::string odszyfrowane = "";
+    char space = '\n';
+
+    int a_inverse = 0;
+    int temp = 0;
+
+    for (int a = 1; a < 26; a++) {
+
+        if (NWD(a, 26) == 1) {
+
+            for (int b = 0; b < 26; b++) {
+
+                for (int i = 0; i < 26; i++) {
+
+                    temp = (a * i) % 26;
+
+                    if (temp == 1) {
+
+                        a_inverse = i;
+
+                    }
+
+                }
+
+                odszyfrowane = "";
+
+                for (int i = 0; i < text.length(); i++) {
+
+                    if (text[i] >= 'A' && text[i] <= 'Z') {
+
+                        char Cchar = (char)(((a_inverse * ((text[i] + 'A' - b)) % 26)) + 'A');
+                        odszyfrowane.push_back(Cchar);
+
+                    }
+                    else if (text[i] >= 'a' && text[i] <= 'z') {
+
+                        char Cchar = (char)(((a_inverse * ((text[i] + 'a' - b)) % 26)) + 'a');
+                        odszyfrowane.push_back(Cchar);
+
+                    }
+                    else {
+
+                        odszyfrowane.push_back(text[i]);
+
+                    }
+
+                }
+
+                odszyfrowane.push_back('\n');
+
+                std::fstream file;
+                file.open("plain.txt", std::fstream::out);
+                file <<  odszyfrowane;
+
+            }
+
+        }
+    }
+}
+
 
 
 int main(int argc, char* argv[]) {
@@ -286,8 +455,8 @@ int main(int argc, char* argv[]) {
     std::string opt1 = argv[1];
     std::string opt2 = argv[2];
 
-    if(opt1 == "-c") {
-        
+    if (opt1 == "-c") {
+
         if (opt2 == "-e") {
 
             std::ifstream ifs("plain.txt");
@@ -298,6 +467,11 @@ int main(int argc, char* argv[]) {
 
             int key = 0;
             myfile >> key;
+
+            if (key < 1 || key > 25) {
+                std::cout << "Error, wrong key for Caesar cipher!" << std::endl;
+                return 1;
+            }
 
             //std::string text = "abcd";
             EncryptCaesar(content, key);
@@ -314,6 +488,11 @@ int main(int argc, char* argv[]) {
             int key = 0;
             myfile >> key;
 
+            if (key < 1 || key > 25) {
+                std::cout << "Error, wrong key for Caesar cipher!" << std::endl;
+                return 1;
+            }
+
             //std::string text = "defg";
             DecryptCaesar(content, key);
 
@@ -321,18 +500,29 @@ int main(int argc, char* argv[]) {
         else if (opt2 == "-j") {
 
             //kryptoanaliza cezara z tekstem jawnym
-            std::string text = "Dod pd nrwdC";
-            std::string help = "kotaZ";
+            std::ifstream cipher("crypto.txt");
+            std::string content((std::istreambuf_iterator<char>(cipher)),
+                (std::istreambuf_iterator<char>()));
+            //std::string text = "Dod pd nrwdC";
 
-            CryptanalysisCaesarWithHelp(text, help);
+            std::ifstream ifs("extra.txt");
+            std::string help((std::istreambuf_iterator<char>(ifs)),
+                (std::istreambuf_iterator<char>()));
+            //std::string help = "kotaZ";
+
+            CryptanalysisCaesarWithHelp(content, help);
 
         }
         else if (opt2 == "-k") {
 
             //kryptoanaliza cezara
-            std::string text = "Ala ma kotaZ";
+            
+            std::ifstream ifs("crypto.txt");
+            std::string content((std::istreambuf_iterator<char>(ifs)),
+                (std::istreambuf_iterator<char>()));
+            //std::string text = "Ala ma kotaZ";
 
-            CryptanalysisCaesar(text);
+            CryptanalysisCaesar(content);
 
         }
         else {
@@ -348,7 +538,11 @@ int main(int argc, char* argv[]) {
 
         if (opt2 == "-e") {
 
-            std::string text = "AB";
+            std::ifstream ifs("plain.txt");
+            std::string content((std::istreambuf_iterator<char>(ifs)),
+                (std::istreambuf_iterator<char>()));
+
+            //std::string text = "AB";
 
             std::fstream myfile("key.txt", std::ios_base::in);
 
@@ -357,12 +551,15 @@ int main(int argc, char* argv[]) {
             myfile >> a;
             myfile >> b;
 
-            EncryptAffine(text, a, b);
+            EncryptAffine(content, a, b);
 
         }
         else if (opt2 == "-d") {
 
-            std::string text = "GJ";
+            std::ifstream ifs("crypto.txt");
+            std::string content((std::istreambuf_iterator<char>(ifs)),
+                (std::istreambuf_iterator<char>()));
+            //std::string text = "GJ";
 
             std::fstream myfile("key.txt", std::ios_base::in);
 
@@ -371,24 +568,33 @@ int main(int argc, char* argv[]) {
             myfile >> a;
             myfile >> b;
 
-            DecryptAffine(text, a, b);
+            DecryptAffine(content, a, b);
 
         }
         else if (opt2 == "-j") {
 
             //kryptoanaliza afinicznego z tekstem jawnym
-            std::string text = "Dod pd nrwdC";
-            std::string help = "kotaZ";
+            std::ifstream cipher("crypto.txt");
+            std::string content((std::istreambuf_iterator<char>(cipher)),
+                (std::istreambuf_iterator<char>()));
+            //std::string text = "Dod pd nrwdC";
 
-            CryptanalysisCaesarWithHelp(text, help);
+            std::ifstream ifs("extra.txt");
+            std::string help((std::istreambuf_iterator<char>(ifs)),
+                (std::istreambuf_iterator<char>()));
+            //std::string help = "kotaZ";
+
+            CryptanalysisAffineWithHelp(content, help);
 
         }
         else if (opt2 == "-k") {
 
-            //kryptoanaliza afinicznego
-            std::string text = "Ala ma kotaZ";
+            //kryptoanaliza afinicznego z tekstem jawnym
+            std::ifstream cipher("crypto.txt");
+            std::string content((std::istreambuf_iterator<char>(cipher)),
+                (std::istreambuf_iterator<char>()));
 
-            CryptanalysisCaesar(text);
+            CryptanalysisAffine(content);
 
         }
         else {
@@ -399,7 +605,6 @@ int main(int argc, char* argv[]) {
         }
 
     }
-
 
     //std::cout << odszyfrowane << std::endl;
 
